@@ -139,7 +139,7 @@ func follow(w http.ResponseWriter, r *http.Request) {
 		Msgtype string `json:"msgtype"`
 		Text    one    `json:"text"`
 	}{
-		Touser:  params.ToUserName,
+		Touser:  params.FromUserName,
 		Msgtype: "text",
 		Text: one{
 			Content: "Hello World",
