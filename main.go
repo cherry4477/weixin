@@ -91,11 +91,11 @@ func weixinin(w http.ResponseWriter, r *http.Request) {
 	// log.Println("scheme", r.URL.Scheme)
 	// log.Println(r.Form["url_long"])
 	fmt.Println("----->here")
-	// body, err := ioutil.ReadAll(r.Body)
-	// if err != nil {
-	// 	return
-	// }
-	// fmt.Println("----->body:", string(body))
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return
+	}
+	fmt.Println("----->body:", string(body))
 	for k, v := range r.Form {
 		log.Println("key:", k)
 		log.Println("val:", strings.Join(v, ""))
