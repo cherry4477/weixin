@@ -3,7 +3,9 @@ package main
 import (
 	"crypto/sha1"
 	"encoding/hex"
+	"encoding/xml"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"sort"
@@ -43,15 +45,66 @@ func weixinin(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+func follow(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != "POST" {
+		return
+	}
+	data, err := GetRequestData(r)
+	if err != nil {
+		return
+	}
+	var params = struct {
+		ToUserName   string `xml:"ToUserName"`
+		FromUserName string `xml:"FromUserName"`
+		CreateTime   int64  `xml:"CreateTime"`
+		MsgType      string `xml:"MsgType"`
+		Event        string `xml:"Event"`
+		EventKey     string `xml:"EventKey"`
+		Ticket       string `xml:"Ticket"`
+	}{}
+
+	err = xml.Unmarshal(data, &params)
+	if err != nil {
+		return
+	}
+	log.Println(params)
+
+	// <xml>
+	// <ToUserName><![CDATA[toUser]]></ToUserName>
+	// <FromUserName><![CDATA[FromUser]]></FromUserName>
+	// <CreateTime>123456789</CreateTime>
+	// <MsgType><![CDATA[event]]></MsgType>
+	// <Event><![CDATA[SCAN]]></Event>
+	// <EventKey><![CDATA[SCENE_VALUE]]></EventKey>
+	// <Ticket><![CDATA[TICKET]]></Ticket>
+	// </xml>
+
+}
 func main() {
 	http.HandleFunc("/", sayhelloName) //设置访问的路由
 	http.HandleFunc("/interface", weixinin)
+	http.HandleFunc("/follow", follow)
 	err := http.ListenAndServe(":9090", nil) //设置监听的端口
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
 }
 
+func GetRequestData(r *http.Request) ([]byte, error) {
+	if r.Body == nil {
+		return nil, nil
+	}
+
+	defer r.Body.Close()
+	data, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
 func checkSignature(r *http.Request) bool {
 	signature := r.FormValue("signature")
 	timestamp := r.FormValue("timestamp")
