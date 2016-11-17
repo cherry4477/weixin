@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha1"
 	"encoding/hex"
 	"encoding/json"
@@ -58,7 +59,11 @@ func updatatoken() {
 		if err != nil {
 			return
 		}
+
 		log.Println("params", params)
+		tokenMutex.Lock()
+		token = params.Access
+		tokenMutex.Unlock()
 
 	}
 	f()
@@ -101,6 +106,7 @@ func weixinin(w http.ResponseWriter, r *http.Request) {
 
 }
 
+//https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=ACCESS_TOKEN
 func follow(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method != "POST" {
@@ -125,6 +131,47 @@ func follow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Println(params)
+	type one struct {
+		Content string `json:"content"`
+	}
+	var obj = struct {
+		Touser  string `json:"touser"`
+		Msgtype string `json:"msgtype"`
+		Text    one    `json:"text"`
+	}{
+		Touser:  params.ToUserName,
+		Msgtype: "text",
+		Text: one{
+			Content: "Hello World",
+		},
+	}
+	data, err = json.Marshal(&obj)
+	if err != nil {
+		return
+	}
+	// h.Write([]byte(tmpStr))
+	request, data, err := RemoteCallWithBody(
+		"POST",
+		"https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token="+token,
+		"",
+		"",
+		data,
+		"application/json; charset=utf-8",
+	)
+
+	if err != nil {
+		return
+	}
+	log.Println(data)
+	log.Println(request)
+	// {
+	//     "touser":"OPENID",
+	//     "msgtype":"text",
+	//     "text":
+	//     {
+	//          "content":"Hello World"
+	//     }
+	// }
 
 	// <xml>
 	// <ToUserName><![CDATA[toUser]]></ToUserName>
@@ -148,6 +195,43 @@ func main() {
 	}
 }
 
+// return RemoteCallWithBody(method, url, token, user, jsonBody, "application/json; charset=utf-8")
+func RemoteCallWithBody(method, url string, token, user string, body []byte, contentType string) (*http.Response, []byte, error) {
+
+	var request *http.Request
+	var err error
+	if len(body) == 0 {
+		request, err = http.NewRequest(method, url, nil)
+	} else {
+		request, err = http.NewRequest(method, url, bytes.NewReader(body))
+	}
+	if err != nil {
+		return nil, nil, err
+	}
+	if contentType != "" {
+		request.Header.Set("Content-Type", contentType)
+	}
+	if token != "" {
+		request.Header.Set("Authorization", token)
+	}
+	if user != "" {
+		request.Header.Set("User", user)
+	}
+	client := &http.Client{
+		Timeout: 30 * time.Second,
+	}
+	response, err := client.Do(request)
+	if response != nil {
+		defer response.Body.Close()
+	}
+	if err != nil {
+		return nil, nil, err
+	}
+
+	bytes, err := ioutil.ReadAll(response.Body)
+	return response, bytes, err
+}
+
 func GetResponseData(r *http.Response) ([]byte, error) {
 	if r != nil {
 		defer r.Body.Close()
@@ -169,6 +253,7 @@ func GetRequestData(r *http.Request) ([]byte, error) {
 
 	return data, nil
 }
+
 func checkSignature(r *http.Request) bool {
 	signature := r.FormValue("signature")
 	timestamp := r.FormValue("timestamp")
