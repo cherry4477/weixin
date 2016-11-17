@@ -100,7 +100,41 @@ func weixinin(w http.ResponseWriter, r *http.Request) {
 		log.Println("key:", k)
 		log.Println("val:", strings.Join(v, ""))
 	}
+	type one struct {
+		Content string `json:"content"`
+	}
+	var obj = struct {
+		Touser  string `json:"touser"`
+		Msgtype string `json:"msgtype"`
+		Text    one    `json:"text"`
+	}{
+		Touser:  r.FormValue("openid"),
+		Msgtype: "text",
+		Text: one{
+			Content: "Hello World",
+		},
+	}
 
+	data, err := json.Marshal(&obj)
+	if err != nil {
+		return
+	}
+	// h.Write([]byte(tmpStr))
+
+	request, data, err := RemoteCallWithBody(
+		"POST",
+		"https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token="+token,
+		"",
+		"",
+		data,
+		"application/json; charset=utf-8",
+	)
+
+	if err != nil {
+		return
+	}
+	log.Println("data", data)
+	log.Println("request", request)
 	// if checkSignature(r) {
 	// 	fmt.Fprint(w, r.FormValue("echostr"))
 	// } else {
