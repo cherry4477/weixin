@@ -36,7 +36,12 @@ func weixinin(w http.ResponseWriter, r *http.Request) {
 		log.Println("val:", strings.Join(v, ""))
 	}
 
-	fmt.Fprint(w, "hello sb ", checkSignature(r)) //这个写入到w的是输出到客户端的
+	if checkSignature(r) {
+		fmt.Fprint(w, r.FormValue("echostr"))
+	} else {
+		fmt.Fprint(w, "hello wixin sb ") //这个写入到w的是输出到客户端的
+	}
+
 }
 func main() {
 	http.HandleFunc("/", sayhelloName) //设置访问的路由
