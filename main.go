@@ -75,34 +75,37 @@ func updatatoken() {
 func sayhelloName(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()       //解析参数，默认是不会解析的
 	fmt.Println(r.Form) //这些信息是输出到服务器端的打印信息
-	fmt.Println("path", r.URL.Path)
-	fmt.Println("scheme", r.URL.Scheme)
-	fmt.Println(r.Form["url_long"])
-	for k, v := range r.Form {
-		fmt.Println("key:", k)
-		fmt.Println("val:", strings.Join(v, ""))
-	}
+	// fmt.Println("path", r.URL.Path)
+	// fmt.Println("scheme", r.URL.Scheme)
+	// fmt.Println(r.Form["url_long"])
+	// for k, v := range r.Form {
+	// 	// fmt.Println("key:", k)
+	// 	// fmt.Println("val:", strings.Join(v, ""))
+	// }
 	fmt.Fprintf(w, "Hello astaxie!") //这个写入到w的是输出到客户端的
 }
 func weixinin(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()       //解析参数，默认是不会解析的
-	log.Println(r.Form) //这些信息是输出到服务器端的打印信息
-	log.Println("path", r.URL.Path)
-	log.Println("scheme", r.URL.Scheme)
-	log.Println(r.Form["url_long"])
-	// winxin
-	// 5oF8FPAe3Z9kNmnqwq1EKfrI58yvC1gUd6KZBAKDkdr
-
-	for k, v := range r.Form {
-		log.Println("key:", k)
-		log.Println("val:", strings.Join(v, ""))
+	r.ParseForm() //解析参数，默认是不会解析的
+	// log.Println(r.Form) //这些信息是输出到服务器端的打印信息
+	// log.Println("path", r.URL.Path)
+	// log.Println("scheme", r.URL.Scheme)
+	// log.Println(r.Form["url_long"])
+	fmt.Println("----->here")
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return
 	}
+	fmt.Println("----->body:", string(body))
+	// for k, v := range r.Form {
+	// 	// log.Println("key:", k)
+	// 	// log.Println("val:", strings.Join(v, ""))
+	// }
 
-	if checkSignature(r) {
-		fmt.Fprint(w, r.FormValue("echostr"))
-	} else {
-		fmt.Fprint(w, "hello wixin sb ") //这个写入到w的是输出到客户端的
-	}
+	// if checkSignature(r) {
+	// 	fmt.Fprint(w, r.FormValue("echostr"))
+	// } else {
+	// 	fmt.Fprint(w, "hello wixin sb ") //这个写入到w的是输出到客户端的
+	// }
 
 }
 
@@ -130,7 +133,9 @@ func follow(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	log.Println(params)
+
+	// log.Println(params)
+
 	type one struct {
 		Content string `json:"content"`
 	}
@@ -145,11 +150,13 @@ func follow(w http.ResponseWriter, r *http.Request) {
 			Content: "Hello World",
 		},
 	}
+
 	data, err = json.Marshal(&obj)
 	if err != nil {
 		return
 	}
 	// h.Write([]byte(tmpStr))
+
 	request, data, err := RemoteCallWithBody(
 		"POST",
 		"https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token="+token,
@@ -162,8 +169,8 @@ func follow(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	log.Println(data)
-	log.Println(request)
+	log.Println("data", data)
+	log.Println("request", request)
 	// {
 	//     "touser":"OPENID",
 	//     "msgtype":"text",
@@ -270,10 +277,10 @@ func checkSignature(r *http.Request) bool {
 	bs := h.Sum(nil)
 	//SHA1 值经常以 16 进制输出，例如在 git commit 中。使用%x 来将散列结果格式化为 16 进制字符串。
 
-	fmt.Println(hex.EncodeToString(bs))
-	fmt.Printf("%s\n", signature)
+	// fmt.Println(hex.EncodeToString(bs))
+	// fmt.Printf("%s\n", signature)
 
-	fmt.Println(hex.EncodeToString(bs) == signature)
+	// fmt.Println(hex.EncodeToString(bs) == signature)
 
 	if hex.EncodeToString(bs) == signature {
 		return true
