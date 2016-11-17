@@ -85,12 +85,12 @@ func sayhelloName(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello astaxie!") //这个写入到w的是输出到客户端的
 }
 func weixinin(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm() //解析参数，默认是不会解析的
-	// log.Println(r.Form) //这些信息是输出到服务器端的打印信息
+	r.ParseForm()       //解析参数，默认是不会解析的
+	log.Println(r.Form) //这些信息是输出到服务器端的打印信息
 	// log.Println("path", r.URL.Path)
 	// log.Println("scheme", r.URL.Scheme)
 	// log.Println(r.Form["url_long"])
-	// fmt.Println("----->here")
+	fmt.Println("----->here")
 	// body, err := ioutil.ReadAll(r.Body)
 	// if err != nil {
 	// 	return
