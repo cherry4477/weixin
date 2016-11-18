@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"encoding/xml"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 )
@@ -58,7 +57,7 @@ func follow(w http.ResponseWriter, r *http.Request) {
 			}
 
 			// log.Println("star", data)
-			resp, data, err := RemoteCallWithBody(
+			_, data, err := RemoteCallWithBody(
 				"POST",
 				"http://datafoundry.coupon.app.dataos.io/charge/v1/provide/coupons?number=1",
 				"",
@@ -74,19 +73,13 @@ func follow(w http.ResponseWriter, r *http.Request) {
 
 			// log.Println("end", data)
 
-			body, err := ioutil.ReadAll(resp.Body)
-
-			if err != nil {
-				log.Println("err:", err)
-				return
-			}
 			log.Println("pass")
 			var card = struct {
 				IsProvide bool   `json:"isProvide"`
 				Code      string `json:"code"`
 			}{}
 
-			err = json.Unmarshal(body, &card)
+			err = json.Unmarshal(data, &card)
 			if err != nil {
 				log.Println("err2:", err)
 				return
