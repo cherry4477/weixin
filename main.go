@@ -85,57 +85,79 @@ func sayhelloName(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello astaxie!") //这个写入到w的是输出到客户端的
 }
 func weixinin(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		return
+	}
 	r.ParseForm()       //解析参数，默认是不会解析的
 	log.Println(r.Form) //这些信息是输出到服务器端的打印信息
 	log.Println("From", r.RemoteAddr, r.Method, r.URL.RequestURI(), r.Proto)
+
+	data, err := GetRequestData(r)
+	if err != nil {
+		return
+	}
+	var common = struct {
+		FromUserName string `xml:"FromUserName"`
+		MsgType      string `xml:"MsgType"`
+		Event        string `xml:"Event"`
+	}{}
+
+	err = xml.Unmarshal(data, &common)
+	if err != nil {
+		return
+	}
+	if common.MsgType == "event" {
+		if common.Event == "subscribe" {
+			type one struct {
+				Content string `json:"content"`
+			}
+			var obj = struct {
+				Touser  string `json:"touser"`
+				Msgtype string `json:"msgtype"`
+				Text    one    `json:"text"`
+			}{
+				Touser:  common.FromUserName,
+				Msgtype: "text",
+				Text: one{
+					Content: "Hello text",
+				},
+			}
+
+			data, err = json.Marshal(&obj)
+			if err != nil {
+				return
+			}
+
+			request, data, err := RemoteCallWithBody(
+				"POST",
+				"https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token="+token,
+				"",
+				"",
+				data,
+				"application/json; charset=utf-8",
+			)
+
+			if err != nil {
+				return
+			}
+			log.Println("data", data)
+			log.Println("request", request)
+		}
+	}
 	// log.Println("path", r.URL.Path)
 	// log.Println("scheme", r.URL.Scheme)
 	// log.Println(r.Form["url_long"])
-	fmt.Println("----->here")
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		return
-	}
-	fmt.Println("----->body:", string(body))
-	for k, v := range r.Form {
-		log.Println("key:", k)
-		log.Println("val:", strings.Join(v, ""))
-	}
-	type one struct {
-		Content string `json:"content"`
-	}
-	var obj = struct {
-		Touser  string `json:"touser"`
-		Msgtype string `json:"msgtype"`
-		Text    one    `json:"text"`
-	}{
-		Touser:  r.FormValue("openid"),
-		Msgtype: "text",
-		Text: one{
-			Content: "Hello World",
-		},
-	}
+	// fmt.Println("----->here")
+	// body, err := ioutil.ReadAll(r.Body)
+	// if err != nil {
+	// 	return
+	// }
+	// fmt.Println("----->body:", string(body))
+	// for k, v := range r.Form {
+	// 	log.Println("key:", k)
+	// 	log.Println("val:", strings.Join(v, ""))
+	// }
 
-	data, err := json.Marshal(&obj)
-	if err != nil {
-		return
-	}
-	// h.Write([]byte(tmpStr))
-
-	request, data, err := RemoteCallWithBody(
-		"POST",
-		"https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token="+token,
-		"",
-		"",
-		data,
-		"application/json; charset=utf-8",
-	)
-
-	if err != nil {
-		return
-	}
-	log.Println("data", data)
-	log.Println("request", request)
 	// if checkSignature(r) {
 	// 	fmt.Fprint(w, r.FormValue("echostr"))
 	// } else {
@@ -154,6 +176,22 @@ func follow(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
+	var common = struct {
+		FromUserName string `xml:"FromUserName"`
+		MsgType      string `xml:"MsgType"`
+		Event        string `xml:"Event"`
+	}{}
+
+	err = xml.Unmarshal(data, &common)
+	if err != nil {
+		return
+	}
+	if common.MsgType == "event" {
+		if common.Event == "subscribe" {
+
+		}
+	}
+
 	var params = struct {
 		ToUserName   string `xml:"ToUserName"`
 		FromUserName string `xml:"FromUserName"`
