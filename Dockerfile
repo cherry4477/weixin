@@ -10,4 +10,4 @@ ADD . .
 
 RUN go build
 
-CMD ["sh", "-c", "./sever"]
+CMD ["sh", "-c", "./weixin"]
