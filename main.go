@@ -87,6 +87,7 @@ func sayhelloName(w http.ResponseWriter, r *http.Request) {
 func weixinin(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()       //解析参数，默认是不会解析的
 	log.Println(r.Form) //这些信息是输出到服务器端的打印信息
+	log.Println("From", r.RemoteAddr, r.Method, r.URL.RequestURI(), r.Proto)
 	// log.Println("path", r.URL.Path)
 	// log.Println("scheme", r.URL.Scheme)
 	// log.Println(r.Form["url_long"])
@@ -190,6 +191,15 @@ func follow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// h.Write([]byte(tmpStr))
+
+	// var my = struct {
+	// 	Touser  string
+	// 	Msgtype string
+	// 	Text    one
+	// }{}
+
+	// json.Unmarshal(data, &my)
+	// my.Touser
 
 	request, data, err := RemoteCallWithBody(
 		"POST",
