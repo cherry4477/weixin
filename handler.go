@@ -68,6 +68,7 @@ func follow(w http.ResponseWriter, r *http.Request) {
 			)
 
 			if err != nil {
+				log.Println("err", err)
 				return
 			}
 
