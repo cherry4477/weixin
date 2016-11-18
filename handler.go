@@ -57,7 +57,7 @@ func follow(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			log.Println("star", data)
+			// log.Println("star", data)
 			resp, data, err := RemoteCallWithBody(
 				"POST",
 				"http://datafoundry.coupon.app.dataos.io/charge/v1/provide/coupons?number=1",
@@ -68,11 +68,11 @@ func follow(w http.ResponseWriter, r *http.Request) {
 			)
 
 			if err != nil {
-				log.Println("err", err)
+				// log.Println("err", err)
 				return
 			}
 
-			log.Println("end", data)
+			// log.Println("end", data)
 
 			body, err := ioutil.ReadAll(resp.Body)
 
@@ -86,10 +86,12 @@ func follow(w http.ResponseWriter, r *http.Request) {
 			}{}
 
 			err = json.Unmarshal(body, &card)
+
 			if err != nil {
 				return
 			}
-
+			log.Println("Code", card.Code)
+			log.Println("IsProvide", card.IsProvide)
 			if card.IsProvide {
 				return
 			}
