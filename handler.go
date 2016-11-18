@@ -74,22 +74,34 @@ func follow(w http.ResponseWriter, r *http.Request) {
 			// log.Println("end", data)
 
 			log.Println("pass")
-			var card = struct {
+			type two struct {
 				IsProvide bool   `json:"isProvide"`
 				Code      string `json:"code"`
-			}{}
+			}
+			type Result struct {
+				Code uint        `json:"code"`
+				Msg  string      `json:"msg"`
+				Data interface{} `json:"data,omitempty"`
+			}
+			var three = two{}
+			var card = Result{
 
+				Data: &three,
+			}
+
+			log.Println("data:", string(data))
 			err = json.Unmarshal(data, &card)
+
 			if err != nil {
 				log.Println("err2:", err)
 				return
 			}
 
-			log.Println("Code", card.Code)
+			log.Println("Code", three.Code)
 
-			log.Println("IsProvide", card.IsProvide)
+			log.Println("IsProvide", three.IsProvide)
 
-			if card.IsProvide {
+			if three.IsProvide {
 				return
 			}
 
@@ -104,7 +116,7 @@ func follow(w http.ResponseWriter, r *http.Request) {
 				Touser:  common.FromUserName,
 				Msgtype: "text",
 				Text: one{
-					Content: card.Code,
+					Content: three.Code,
 				},
 			}
 
