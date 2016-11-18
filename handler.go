@@ -57,19 +57,24 @@ func follow(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			log.Println("star", data)
 			resp, data, err := RemoteCallWithBody(
 				"POST",
-				"https://datafoundry.coupon.app.dataos.io/charge/v1/provide/coupons?number=1&amount=69",
+				"https://datafoundry.coupon.app.dataos.io/charge/v1/provide/coupons?number=1",
 				"",
 				"",
 				data,
 				"application/json; charset=utf-8",
 			)
+
 			if err != nil {
 				return
 			}
 
+			log.Println("end", data)
+
 			body, err := ioutil.ReadAll(resp.Body)
+
 			if err != nil {
 				return
 			}
