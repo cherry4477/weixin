@@ -77,21 +77,25 @@ func follow(w http.ResponseWriter, r *http.Request) {
 			body, err := ioutil.ReadAll(resp.Body)
 
 			if err != nil {
+				log.Println("err:", err)
 				return
 			}
-
+			log.Println("pass")
 			var card = struct {
 				IsProvide bool   `json:"isProvide"`
 				Code      string `json:"code"`
 			}{}
 
 			err = json.Unmarshal(body, &card)
-
 			if err != nil {
+				log.Println("err2:", err)
 				return
 			}
+
 			log.Println("Code", card.Code)
+
 			log.Println("IsProvide", card.IsProvide)
+
 			if card.IsProvide {
 				return
 			}
