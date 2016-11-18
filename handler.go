@@ -60,7 +60,7 @@ func follow(w http.ResponseWriter, r *http.Request) {
 			log.Println("star", data)
 			resp, data, err := RemoteCallWithBody(
 				"POST",
-				"https://datafoundry.coupon.app.dataos.io/charge/v1/provide/coupons?number=1",
+				"http://datafoundry.coupon.app.dataos.io/charge/v1/provide/coupons?number=1",
 				"",
 				"",
 				data,
