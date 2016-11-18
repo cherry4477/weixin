@@ -60,7 +60,7 @@ func follow(w http.ResponseWriter, r *http.Request) {
 
 			request, data, err := RemoteCallWithBody(
 				"POST",
-				"https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token="+token,
+				"https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token="+gettoken(),
 				"",
 				"",
 				data,
