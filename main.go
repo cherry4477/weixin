@@ -5,8 +5,6 @@ import (
 	"crypto/sha1"
 	"encoding/hex"
 	"encoding/json"
-	"encoding/xml"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -72,219 +70,17 @@ func updatatoken() {
 	}
 }
 
-func sayhelloName(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()       //解析参数，默认是不会解析的
-	fmt.Println(r.Form) //这些信息是输出到服务器端的打印信息
-	// fmt.Println("path", r.URL.Path)
-	// fmt.Println("scheme", r.URL.Scheme)
-	// fmt.Println(r.Form["url_long"])
-	// for k, v := range r.Form {
-	// 	// fmt.Println("key:", k)
-	// 	// fmt.Println("val:", strings.Join(v, ""))
-	// }
-	fmt.Fprintf(w, "Hello astaxie!") //这个写入到w的是输出到客户端的
-}
-func weixinin(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		return
-	}
-	r.ParseForm()       //解析参数，默认是不会解析的
-	log.Println(r.Form) //这些信息是输出到服务器端的打印信息
-	log.Println("From", r.RemoteAddr, r.Method, r.URL.RequestURI(), r.Proto)
-
-	data, err := GetRequestData(r)
-	if err != nil {
-		return
-	}
-	var common = struct {
-		FromUserName string `xml:"FromUserName"`
-		MsgType      string `xml:"MsgType"`
-		Event        string `xml:"Event"`
-	}{}
-
-	err = xml.Unmarshal(data, &common)
-	if err != nil {
-		return
-	}
-	if common.MsgType == "event" {
-		if common.Event == "subscribe" {
-			type one struct {
-				Content string `json:"content"`
-			}
-			var obj = struct {
-				Touser  string `json:"touser"`
-				Msgtype string `json:"msgtype"`
-				Text    one    `json:"text"`
-			}{
-				Touser:  common.FromUserName,
-				Msgtype: "text",
-				Text: one{
-					Content: "Hello text",
-				},
-			}
-
-			data, err = json.Marshal(&obj)
-			if err != nil {
-				return
-			}
-
-			request, data, err := RemoteCallWithBody(
-				"POST",
-				"https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token="+token,
-				"",
-				"",
-				data,
-				"application/json; charset=utf-8",
-			)
-
-			if err != nil {
-				return
-			}
-			log.Println("data", data)
-			log.Println("request", request)
-		}
-	}
-	// log.Println("path", r.URL.Path)
-	// log.Println("scheme", r.URL.Scheme)
-	// log.Println(r.Form["url_long"])
-	// fmt.Println("----->here")
-	// body, err := ioutil.ReadAll(r.Body)
-	// if err != nil {
-	// 	return
-	// }
-	// fmt.Println("----->body:", string(body))
-	// for k, v := range r.Form {
-	// 	log.Println("key:", k)
-	// 	log.Println("val:", strings.Join(v, ""))
-	// }
-
-	// if checkSignature(r) {
-	// 	fmt.Fprint(w, r.FormValue("echostr"))
-	// } else {
-	// 	fmt.Fprint(w, "hello wixin sb ") //这个写入到w的是输出到客户端的
-	// }
-
-}
-
-//https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token=ACCESS_TOKEN
-func follow(w http.ResponseWriter, r *http.Request) {
-
-	if r.Method != "POST" {
-		return
-	}
-	data, err := GetRequestData(r)
-	if err != nil {
-		return
-	}
-	var common = struct {
-		FromUserName string `xml:"FromUserName"`
-		MsgType      string `xml:"MsgType"`
-		Event        string `xml:"Event"`
-	}{}
-
-	err = xml.Unmarshal(data, &common)
-	if err != nil {
-		return
-	}
-	if common.MsgType == "event" {
-		if common.Event == "subscribe" {
-
-		}
-	}
-
-	var params = struct {
-		ToUserName   string `xml:"ToUserName"`
-		FromUserName string `xml:"FromUserName"`
-		CreateTime   int64  `xml:"CreateTime"`
-		MsgType      string `xml:"MsgType"`
-		Event        string `xml:"Event"`
-		EventKey     string `xml:"EventKey"`
-		Ticket       string `xml:"Ticket"`
-	}{}
-
-	err = xml.Unmarshal(data, &params)
-	if err != nil {
-		return
-	}
-
-	// log.Println(params)
-
-	type one struct {
-		Content string `json:"content"`
-	}
-	var obj = struct {
-		Touser  string `json:"touser"`
-		Msgtype string `json:"msgtype"`
-		Text    one    `json:"text"`
-	}{
-		Touser:  params.FromUserName,
-		Msgtype: "text",
-		Text: one{
-			Content: "Hello World",
-		},
-	}
-
-	data, err = json.Marshal(&obj)
-	if err != nil {
-		return
-	}
-	// h.Write([]byte(tmpStr))
-
-	// var my = struct {
-	// 	Touser  string
-	// 	Msgtype string
-	// 	Text    one
-	// }{}
-
-	// json.Unmarshal(data, &my)
-	// my.Touser
-
-	request, data, err := RemoteCallWithBody(
-		"POST",
-		"https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token="+token,
-		"",
-		"",
-		data,
-		"application/json; charset=utf-8",
-	)
-
-	if err != nil {
-		return
-	}
-	log.Println("data", data)
-	log.Println("request", request)
-	// {
-	//     "touser":"OPENID",
-	//     "msgtype":"text",
-	//     "text":
-	//     {
-	//          "content":"Hello World"
-	//     }
-	// }
-
-	// <xml>
-	// <ToUserName><![CDATA[toUser]]></ToUserName>
-	// <FromUserName><![CDATA[FromUser]]></FromUserName>
-	// <CreateTime>123456789</CreateTime>
-	// <MsgType><![CDATA[event]]></MsgType>
-	// <Event><![CDATA[SCAN]]></Event>
-	// <EventKey><![CDATA[SCENE_VALUE]]></EventKey>
-	// <Ticket><![CDATA[TICKET]]></Ticket>
-	// </xml>
-
-}
 func main() {
 	go updatatoken()
 	http.HandleFunc("/", sayhelloName) //设置访问的路由
-	http.HandleFunc("/interface", weixinin)
-	http.HandleFunc("/follow", follow)
+	http.HandleFunc("/interface", follow)
 	err := http.ListenAndServe(":9090", nil) //设置监听的端口
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
 }
 
-// return RemoteCallWithBody(method, url, token, user, jsonBody, "application/json; charset=utf-8")
+// RemoteCallWithBody send http
 func RemoteCallWithBody(method, url string, token, user string, body []byte, contentType string) (*http.Response, []byte, error) {
 
 	var request *http.Request
@@ -321,6 +117,7 @@ func RemoteCallWithBody(method, url string, token, user string, body []byte, con
 	return response, bytes, err
 }
 
+// GetResponseData parse Response
 func GetResponseData(r *http.Response) ([]byte, error) {
 	if r != nil {
 		defer r.Body.Close()
@@ -329,6 +126,8 @@ func GetResponseData(r *http.Response) ([]byte, error) {
 	return ioutil.ReadAll(r.Body)
 
 }
+
+// GetRequestData parse Request
 func GetRequestData(r *http.Request) ([]byte, error) {
 	if r.Body == nil {
 		return nil, nil
@@ -359,14 +158,9 @@ func checkSignature(r *http.Request) bool {
 	bs := h.Sum(nil)
 	//SHA1 值经常以 16 进制输出，例如在 git commit 中。使用%x 来将散列结果格式化为 16 进制字符串。
 
-	// fmt.Println(hex.EncodeToString(bs))
-	// fmt.Printf("%s\n", signature)
-
-	// fmt.Println(hex.EncodeToString(bs) == signature)
-
 	if hex.EncodeToString(bs) == signature {
 		return true
-	} else {
-		return false
 	}
+	return false
+
 }
