@@ -15,6 +15,7 @@ func sayhelloName(w http.ResponseWriter, r *http.Request) {
 }
 
 func follow(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, r.FormValue("echostr"))
 	if r.Method != "POST" {
 		return
 	}
@@ -108,6 +109,8 @@ func follow(w http.ResponseWriter, r *http.Request) {
 			type one struct {
 				Content string `json:"content"`
 			}
+			var str = three.Code[:4] + "-" + three.Code[4:8] + "-"
+			str = str + three.Code[8:12] + "-" + three.Code[12:16]
 			var obj = struct {
 				Touser  string `json:"touser"`
 				Msgtype string `json:"msgtype"`
@@ -116,7 +119,7 @@ func follow(w http.ResponseWriter, r *http.Request) {
 				Touser:  common.FromUserName,
 				Msgtype: "text",
 				Text: one{
-					Content: three.Code,
+					Content: "您的充值卡号为" + str + "，有效期截止至2017年02月31日",
 				},
 			}
 
