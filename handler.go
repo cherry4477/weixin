@@ -15,7 +15,7 @@ func sayhelloName(w http.ResponseWriter, r *http.Request) {
 }
 
 func follow(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, r.FormValue("echostr"))
+	//fmt.Fprint(w, r.FormValue("echostr"))
 	if r.Method != "POST" {
 		return
 	}
@@ -60,7 +60,7 @@ func follow(w http.ResponseWriter, r *http.Request) {
 			// log.Println("star", data)
 			_, data, err := RemoteCallWithBody(
 				"POST",
-				"http://datafoundry.coupon.app.dataos.io/charge/v1/provide/coupons?number=1",
+				"http://datafoundry.pro.coupon.app.dataos.io/charge/v1/provide/coupons?number=1",
 				"",
 				"",
 				data,
