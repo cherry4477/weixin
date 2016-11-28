@@ -15,7 +15,7 @@ func sayhelloName(w http.ResponseWriter, r *http.Request) {
 }
 
 func follow(w http.ResponseWriter, r *http.Request) {
-	//fmt.Fprint(w, r.FormValue("echostr"))
+	fmt.Fprint(w, r.FormValue("echostr"))
 	if r.Method != "POST" {
 		return
 	}
