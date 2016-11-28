@@ -6,7 +6,40 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
+
+var RechargeSercice string
+
+func init() {
+	RechargeSercice = BuildServiceUrlPrefixFromEnv("CouponSercice", false, os.Getenv("ENV_NAME_DATAFOUNDRYRECHARGE_SERVICE_HOST"), os.Getenv("ENV_NAME_DATAFOUNDRYRECHARGE_SERVICE_PORT"))
+}
+
+func BuildServiceUrlPrefixFromEnv(name string, isHttps bool, addrEnv string, portEnv string) string {
+	var addr string
+	addr = os.Getenv(addrEnv)
+
+	if addr == "" {
+		fmt.Printf("%s env should not be null", addrEnv)
+	}
+	if portEnv != "" {
+		port := os.Getenv(portEnv)
+		if port != "" {
+			addr += ":" + port
+		}
+	}
+
+	prefix := ""
+	if isHttps {
+		prefix = fmt.Sprintf("https://%s", addr)
+	} else {
+		prefix = fmt.Sprintf("http://%s", addr)
+	}
+
+	fmt.Printf("%s = %s", name, prefix)
+
+	return prefix
+}
 
 func sayhelloName(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()                   //解析参数，默认是不会解析的
@@ -60,7 +93,7 @@ func follow(w http.ResponseWriter, r *http.Request) {
 			// log.Println("star", data)
 			_, data, err := RemoteCallWithBody(
 				"POST",
-				"http://datafoundry.pro.coupon.app.dataos.io/charge/v1/provide/coupons?number=1",
+				RechargeSercice+"/charge/v1/provide/coupons?number=1",
 				"",
 				"",
 				data,
