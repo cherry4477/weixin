@@ -12,7 +12,7 @@ import (
 var RechargeSercice string
 
 func init() {
-	RechargeSercice = BuildServiceUrlPrefixFromEnv("CouponSercice", false, os.Getenv("ENV_NAME_DATAFOUNDRYRECHARGE_SERVICE_HOST"), os.Getenv("ENV_NAME_DATAFOUNDRYRECHARGE_SERVICE_PORT"))
+	RechargeSercice = BuildServiceUrlPrefixFromEnv("CouponSercice", false, os.Getenv("ENV_NAME_DATAFOUNDRYCOUPON_SERVICE_HOST"), os.Getenv("ENV_NAME_DATAFOUNDRYCOUPON_SERVICE_PORT"))
 }
 
 func BuildServiceUrlPrefixFromEnv(name string, isHttps bool, addrEnv string, portEnv string) string {
