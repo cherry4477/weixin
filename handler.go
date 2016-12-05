@@ -66,12 +66,15 @@ func follow(w http.ResponseWriter, r *http.Request) {
 		MsgType      string `xml:"MsgType"`
 		Event        string `xml:"Event"`
 		CreateTime   int64  `xml:"CreateTime"`
+		Content      string `xml:"Content"`
 	}{}
 
 	err = xml.Unmarshal(data, &common)
 	if err != nil {
 		return
 	}
+
+	fmt.Println("------------>", common)
 
 	if common.MsgType == "event" {
 		if common.Event == "subscribe" {
