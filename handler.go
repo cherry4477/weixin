@@ -36,7 +36,7 @@ func BuildServiceUrlPrefixFromEnv(name string, isHttps bool, addrEnv string, por
 		prefix = fmt.Sprintf("http://%s", addr)
 	}
 
-	fmt.Printf("%s = %s", name, prefix)
+	fmt.Printf("%s = %s\n", name, prefix)
 
 	return prefix
 }
@@ -45,6 +45,14 @@ func sayhelloName(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()                   //解析参数，默认是不会解析的
 	fmt.Println(r.Form)             //这些信息是输出到服务器端的打印信息
 	fmt.Fprintf(w, "Hello weixin!") //这个写入到w的是输出到客户端的
+}
+
+type receiveMessage struct {
+	FromUserName string `xml:"FromUserName"`
+	MsgType      string `xml:"MsgType"`
+	Event        string `xml:"Event"`
+	CreateTime   int64  `xml:"CreateTime"`
+	Content      string `xml:"Content"`
 }
 
 func follow(w http.ResponseWriter, r *http.Request) {
@@ -61,20 +69,19 @@ func follow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	//createtime
-	var common = struct {
-		FromUserName string `xml:"FromUserName"`
-		MsgType      string `xml:"MsgType"`
-		Event        string `xml:"Event"`
-		CreateTime   int64  `xml:"CreateTime"`
-		Content      string `xml:"Content"`
-	}{}
+	common := &receiveMessage{}
 
-	err = xml.Unmarshal(data, &common)
+	err = xml.Unmarshal(data, common)
 	if err != nil {
 		return
 	}
 
 	fmt.Println("------------>", common)
+
+	err = replySomething(common)
+	if err != nil {
+		return
+	}
 
 	if common.MsgType == "event" {
 		if common.Event == "subscribe" {
@@ -186,4 +193,84 @@ func follow(w http.ResponseWriter, r *http.Request) {
 	// 	fmt.Fprint(w, "hello wixin sb ") //这个写入到w的是输出到客户端的
 	// }
 
+}
+
+type sendMessage struct {
+	Touser  string `json:"touser"`
+	Msgtype string `json:"msgtype"`
+	Text    text   `json:"text"`
+}
+
+type text struct {
+	Content string `json:"content"`
+}
+
+func replySomething(info *receiveMessage) error {
+	fmt.Println("---->Into replySomething function")
+
+	if info.MsgType == "text" {
+		fmt.Println("Message type is text")
+
+		err := replyStrategyWithText(info)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func replyStrategyWithText(info *receiveMessage) error {
+
+	if info.Content == "傻逼" {
+		replyInfo := &sendMessage{
+			Touser:  info.FromUserName,
+			Msgtype: "text",
+			Text: text{
+				Content: "你才是傻逼",
+			},
+		}
+		err := replyContent(replyInfo)
+		if err != nil {
+			return err
+		}
+
+	} else {
+		replyInfo := &sendMessage{
+			Touser:  info.FromUserName,
+			Msgtype: "text",
+			Text: text{
+				Content: "Hello",
+			},
+		}
+
+		err := replyContent(replyInfo)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func replyContent(info *sendMessage) error {
+	data, err := json.Marshal(info)
+	if err != nil {
+		return err
+	}
+
+	request, data, err := RemoteCallWithBody(
+		"POST",
+		"https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token="+gettoken(),
+		"",
+		"",
+		data,
+		"application/json; charset=utf-8",
+	)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("request:", request)
+
+	return err
 }
